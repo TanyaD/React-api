@@ -1,0 +1,31 @@
+.root {
+    flex-grow: 1;
+    justify-content: center
+}
+
+
+.formControl {
+    margin-top: 10px;
+    margin-left: 80%;
+    min-width: 120px;
+    display: block
+}
+
+.listView {
+    display: block
+}
+
+.card {
+    max-width: 345px;
+    height: 100%;
+}
+
+
+.media {
+    height: 0;
+    padding-top: 56.25%
+}
+
+.cardhead {
+    height: 15%
+}
