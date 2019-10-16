@@ -17,8 +17,8 @@ class MovieList extends Component {
       movies: [],
       searchQuery: '',
       count: 0,
-        open: false,
-      movieId:0
+      open: false,
+      movieId: 0
     };
     this.services = new Services();
   }
@@ -27,7 +27,7 @@ class MovieList extends Component {
     this.services.getMovies().then(data =>
       this.setState({
         movies: data.results,
-          count: data.results.length,
+        count: data.results.length
       })
     );
     document.addEventListener('mousedown', this.handleClickOutside);
@@ -36,56 +36,57 @@ class MovieList extends Component {
     document.removeEventListener('mousedown', this.handleClickOutside);
   }
 
-    handleOpen = (e) => {
-        const movieID = e.target.id
-      this.setState(state => ({
-          open: !state.open,
-          movieId: movieID,
-
-      }));
-        console.log(e.target.id)
+  handleOpen = e => {
+    const movieID = e.target.id;
+    this.setState(state => ({
+      open: !state.open,
+      movieId: movieID
+    }));
   };
 
   handleClickOutside = event => {
-      this.setState({
-          open: false
-      });
-
+    this.setState({
+      open: false
+    });
   };
 
   render() {
     const listMovies = this.state.movies;
     const myMovies = listMovies.map(item => (
       <Grid
-            key={item.id}
-            item
-            className={styles.grid}
-            onClick={this.handleOpen}
-        >
-            <Card className={styles.card}>
+        item
+        key={item.id}
+        className={styles.grid}
+        onClick={this.handleOpen}
+      >
+        <Card className={styles.card}>
           <CardHeader
             className={styles.cardhead}
             title={item.title}
-                    subheader={item.release_date}
+            subheader={item.release_date}
           />
           <CardMedia
             className={styles.media}
             image={`https://image.tmdb.org/t/p/w185_and_h278_bestv2/${item.poster_path}`}
-                    title='Movie'
-                    id={item.poster_path}
+            title='Movie'
+            id={item.poster_path}
           />
           <CardContent>
             <Typography variant='body2' color='textSecondary' component='p'>
               {item.overview}
             </Typography>
-                </CardContent>
-                </Card>
+          </CardContent>
+        </Card>
       </Grid>
     ));
 
     return (
       <div>
-            <div>{this.state.open && <SimpleModal open={this.state.open} movieId={this.state.movieId} />}</div>
+        <div>
+          {this.state.open && (
+            <SimpleModal open={this.state.open} movieId={this.state.movieId} />
+          )}
+        </div>
         <div className={styles.root}>
           <Grid container className={styles.root} spacing={1}>
             {myMovies}
