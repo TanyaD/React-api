@@ -1,26 +1,29 @@
-import React, { Component } from 'react';
-import {BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
-import Button from '@material-ui/core/Button';
+import React from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { Provider } from "react-redux";
+import PropTypes from "prop-types";
 
-import HomePage from './HomePage';
-import MoviePage from './MoviePage';
-import NotFound from './NotFound';
+import MoviePage from "../MoviePage/MoviePage";
+import HomePage from "../HomePage/HomePage";
+import NotFound from "../NotFound/NotFound";
+import SimpleModal from "../Modal/Modal";
 
-class App extends Component {
-    render() {
-        return (
-            <div>
-                <Router>
-                    <Switch>
-                        <Route exact path='/' component={HomePage} />
-                        <Route path='/moviepage' component={MoviePage}/>
-                        <Route path='/home' component={HomePage} />
-                        <Route path='*' component={NotFound} />
-                    </Switch>
-                </Router>
-            </div>
-        )
-    }
-}
+const App = ({ store }) => (
+  <Provider store={store}>
+    <Router>
+      <Switch>
+        <Route exact path="/" component={HomePage} />
+        <Route path="/home" component={HomePage} />
+        <Route path="/moviepage" component={MoviePage} />
+        <Route path="/modal" component={SimpleModal} />
+        <Route path="*" component={NotFound} />
+      </Switch>
+    </Router>
+  </Provider>
+);
+
+App.propTypes = {
+  store: PropTypes.object.isRequired
+};
 
 export default App;
