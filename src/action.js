@@ -47,3 +47,21 @@ export function fetchMV() {
       .catch(error => dispatch(fetchMVFailure(error)));
   };
 }
+
+export const searchMovies=(query)=> {
+    const inputQuery = query
+    console.log(inputQuery+">>>>>")
+    return async dispatch => {
+        dispatch(fetchMVBegin());
+        return fetch(
+          `${HOST}${SEARCH_MOVIES_URL}?api_key=${API_KEY}&language=en-US&page=1&include_adult=false&query=${inputQuery}`
+        )
+          .then(res => res.json())
+          .then(json => {
+            const movies = json.results;
+            dispatch(fetchMVSuccess(movies));
+            return json;
+          })
+          .catch(error => dispatch(fetchMVFailure(error)));
+      };
+}
