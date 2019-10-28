@@ -1,35 +1,53 @@
 const initialState = {
-  data: [],
   loading: false,
   count: 0,
-  movies: []
+  movies: [],
+  searchQuery:'',
+  movie_id:0,
+  open: false
 };
 export default function reducer(state = initialState, action) {
-
+//console.log(state)
   switch (action.type) {
-    case "FETCH_MV_BEGIN":
+    case "FETCH_MOVIES_BEGIN":
       return {
         ...state,
         loading: true,
         error: null
       };
 
-    case "FETCH_MV_SUCCESS":
+    case "FETCH_MOVIES_SUCCESS":
       return {
         ...state,
         loading: false,
-        data: action.payload,
         movies: action.payload
       };
 
-    case "FETCH_MV_FAILURE":
+    case "FETCH_MOVIES_FAILURE":
       return {
         ...state,
         loading: false,
         error: action.payload.error,
-        data: [],
         movies: []
       };
+
+      case "SEARCH_QUERY":
+  //      console.log(">> SEARCH QUERY")
+          return {
+            ...state,
+            searchQuery: action.query,
+          };
+      case "OPEN_MOVIE_ID":
+          return {
+            ...state,
+            movie_id: action.movie_id,
+            open: true
+          };
+          case "CLOSE_MODAL":
+            return{
+              ...state,
+              open: false
+            };
     default:
       return state;
   }
