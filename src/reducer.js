@@ -7,7 +7,6 @@ const initialState = {
   open: false
 };
 export default function reducer(state = initialState, action) {
-//console.log(state)
   switch (action.type) {
     case "FETCH_MOVIES_BEGIN":
       return {
@@ -32,7 +31,6 @@ export default function reducer(state = initialState, action) {
       };
 
       case "SEARCH_QUERY":
-  //      console.log(">> SEARCH QUERY")
           return {
             ...state,
             searchQuery: action.query,
