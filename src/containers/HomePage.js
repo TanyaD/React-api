@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
+import queryString from "query-string";
 import { withStyles } from "@material-ui/core/styles";
 import { fade } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
@@ -13,10 +14,9 @@ import ButtonGroup from "@material-ui/core/ButtonGroup";
 
 import SortBox from "../SortBox/SortBox";
 import MovieList from "../MovieList/MovieList";
-import { fetchMV } from "../../actions/actions";
-import { searchMovies }  from "../../actions/actions";
+import { fetchMovie } from "../../actions/actions";
+import { searchMovies } from "../../actions/actions";
 import { setSearchQuery } from "../../actions/actions";
-
 
 const styles = theme => ({
   search: {
@@ -60,21 +60,30 @@ const styles = theme => ({
 
 class HomePage extends Component {
   componentDidMount() {
-    this.fetchAction();
+    const values = queryString.parse(this.props.location.search);
+    this.props.location.search
+      ? this.props.searchMovies(values.query, values.language, values.page) &&
+        this.props.setSearchQuery(values.query)
+      : this.fetchAction();
   }
 
   fetchAction = () => {
-    this.props.fetchMV();
+    this.props.fetchMovie();
   };
 
   handleButtonClicked = e => {
-    this.props.searchMovies(this.props.searchQuery)
+    this.props.searchQuery
+      ? this.props.searchMovies(this.props.searchQuery) &&
+        this.props.history.push(
+          `/?language=${this.props.language}&sort_by=${this.props.sort_by}&include_adult=${this.props.include_adult}&include_video=${this.props.include_video}&page=${this.props.page}&query=${this.props.searchQuery}`
+        )
+      : this.fetchAction();
   };
 
-  setSearchQuery=(e)=>{
-   // console.log(e.target.value, "e.target.value <<<")
-    this.props.setSearchQuery(e.target.value)
-  }
+  setSearchQuery = e => {
+    this.props.setSearchQuery(e.target.value);
+  };
+
   render() {
     const { classes } = this.props;
     return (
@@ -99,7 +108,7 @@ class HomePage extends Component {
                     input: classes.inputInput
                   }}
                   value={this.props.searchQuery}
-                  onInput={e => this.setSearchQuery(e) }
+                  onInput={e => this.setSearchQuery(e)}
                   placeholder="Search ..."
                 />
               </div>
@@ -146,11 +155,17 @@ class HomePage extends Component {
 const mapStateToProps = state => ({
   movies: state.movies,
   error: state.error,
-  searchQuery: state.searchQuery
+  searchQuery: state.searchQuery,
+  count: state.count,
+  language: state.language,
+  sort_by: state.sort_by,
+  include_adult: state.include_adult,
+  page: state.page,
+  include_video: state.include_video
 });
 
 const mapDispatchToProps = {
-  fetchMV,
+  fetchMovie,
   searchMovies,
   setSearchQuery
 };
