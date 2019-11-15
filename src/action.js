@@ -106,36 +106,4 @@ export const searchByDirector = query => {
   };
 };
 
-export function sortMovie(sort_by) {
-  return async dispatch => {
-    dispatch(fetchMovieBegin());
-    return fetch(
-      `${HOST}${GET_MOVIES_URL}?api_key=${API_KEY}&language=en-US&sort_by=${sort_by}`
-    )
-      .then(res => res.json())
-      .then(json => {
-        const movies = json.results;
-        const totalResults = json.total_results;
-        dispatch(fetchMovieSuccess(movies));
-        dispatch(updateMovieResults(totalResults));
-        return json;
-      })
-      .catch(error => dispatch(fetchMovieFailure(error)));
-  };
-}
 
-export const nextPage = pageNumber => {
-  return async dispatch => {
-    dispatch(fetchMovieBegin());
-    return fetch(
-      `${HOST}${GET_MOVIES_URL}?api_key=${API_KEY}&page=${pageNumber}`
-    )
-      .then(res => res.json())
-      .then(json => {
-        const movies = json.results;
-        dispatch(fetchMovieSuccess(movies));
-        return json;
-      })
-      .catch(error => dispatch(fetchMovieFailure(error)));
-  };
-};
