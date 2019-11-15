@@ -9,7 +9,7 @@ export const UPDATE_TOTAL_RESULTS = "UPDATE_TOTAL_RESULTS";
 export const SET_MOVIE_INFO = "SET_MOVIE_INFO";
 export const ACTIVATE_PAGE = "ACTIVATE_PAGE";
 
-const apiKey = ;
+const apiKey = process.env.REACT_APP_MOVIE_API_KEY;
 const base = "https://api.themoviedb.org";
 
 export const setSearchQuery = value => ({ type: SEARCH_QUERY, query: value });
