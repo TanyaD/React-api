@@ -11,12 +11,15 @@ import SearchIcon from "@material-ui/icons/Search";
 import Typography from "@material-ui/core/Typography";
 import InputBase from "@material-ui/core/InputBase";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import SortBox from "../SortBox/SortBox";
 import MovieList from "../MovieList/MovieList";
-import { fetchMovie } from "../../actions/actions";
+import PaginationBottom from "../Pagination/Pagination";
+import { fetchMovies } from "../../actions/actions";
 import { searchMovies } from "../../actions/actions";
 import { setSearchQuery } from "../../actions/actions";
+import { searchByDirector } from "../../actions/actions";
 
 const styles = theme => ({
   search: {
@@ -55,6 +58,13 @@ const styles = theme => ({
     textDecoration: "none",
     color: "inherit",
     fontSize: "20px"
+  },
+  load: {
+    display: "flex",
+    marginLeft: "50%"
+  },
+  pagination: {
+    marginTop: theme.spacing(2)
   }
 });
 
@@ -62,21 +72,27 @@ class HomePage extends Component {
   componentDidMount() {
     const values = queryString.parse(this.props.location.search);
     this.props.location.search
-      ? this.props.searchMovies(values.query, values.language, values.page) &&
+      ? this.props.searchMovies(values.query, values.page) &&
         this.props.setSearchQuery(values.query)
       : this.fetchAction();
   }
 
   fetchAction = () => {
-    this.props.fetchMovie();
+    this.props.fetchMovies(this.props.sort_by, this.props.currentPage);
   };
 
   handleButtonClicked = e => {
     this.props.searchQuery
       ? this.props.searchMovies(this.props.searchQuery) &&
         this.props.history.push(
-          `/?language=${this.props.language}&sort_by=${this.props.sort_by}&include_adult=${this.props.include_adult}&include_video=${this.props.include_video}&page=${this.props.page}&query=${this.props.searchQuery}`
+          `/?page=${this.props.page}&query=${this.props.searchQuery}`
         )
+      : this.fetchAction();
+  };
+
+  handleButtonClicked2 = e => {
+    this.props.searchQuery
+      ? this.props.searchByDirector(this.props.searchQuery)
       : this.fetchAction();
   };
 
@@ -84,8 +100,13 @@ class HomePage extends Component {
     this.props.setSearchQuery(e.target.value);
   };
 
+  returnHome = () => {
+    this.props.fetchMovies("popularity.desc", 1);
+  };
+
   render() {
     const { classes } = this.props;
+    const numberPages = Math.ceil(this.props.totalResults / 20);
     return (
       <div>
         <div>
@@ -95,6 +116,7 @@ class HomePage extends Component {
                 component={Link}
                 to="/home"
                 className={classes.noUnderline}
+                onClick={this.returnHome}
               >
                 Movie Time
               </Typography>
@@ -121,6 +143,7 @@ class HomePage extends Component {
                   variant="contained"
                   fullWidth
                   value="title"
+                  id="titleButton"
                   onClick={this.handleButtonClicked}
                 >
                   Title
@@ -129,24 +152,37 @@ class HomePage extends Component {
                   variant="contained"
                   fullWidth
                   value="director"
-                  onClick={this.handleButtonClicked}
+                  onClick={this.handleButtonClicked2}
                 >
                   Director
-                </Button>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  value="year"
-                  onClick={this.handleButtonClicked}
-                >
-                  Year
                 </Button>
               </ButtonGroup>
             </Toolbar>
           </AppBar>
         </div>
-        <SortBox count={this.props.count} />
-        <MovieList movies={this.props.movies} />
+        {this.props.loading ? (
+          <div className={classes.load}>
+            <p>Loading.......</p>
+            <CircularProgress />
+          </div>
+        ) : (
+          <div>
+            <SortBox count={this.props.count} />
+            <MovieList movies={this.props.movies} />
+            {numberPages > 1 ? (
+              <div className={classes.pagination}>
+                <PaginationBottom
+                  pages={numberPages}
+                  currentPage={this.props.currentPage}
+                  currentUrl={this.props.currentUrl}
+                  query={this.props.currentQuery}
+                />
+              </div>
+            ) : (
+              ""
+            )}
+          </div>
+        )}
       </div>
     );
   }
@@ -157,17 +193,19 @@ const mapStateToProps = state => ({
   error: state.error,
   searchQuery: state.searchQuery,
   count: state.count,
-  language: state.language,
   sort_by: state.sort_by,
-  include_adult: state.include_adult,
   page: state.page,
-  include_video: state.include_video
+  totalResults: state.totalResults,
+  currentPage: state.currentPage,
+  currentUrl: state.currentUrl,
+  currentQuery: state.currentQuery
 });
 
 const mapDispatchToProps = {
-  fetchMovie,
+  fetchMovies,
   searchMovies,
-  setSearchQuery
+  setSearchQuery,
+  searchByDirector
 };
 
 export default withStyles(styles)(
