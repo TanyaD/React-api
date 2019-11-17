@@ -5,38 +5,44 @@ const initialState = {
   searchQuery: "",
   movie_id: 0,
   open: false,
-  language: "en-US",
-  sort_by: "primary_release_date.asc",
-  include_adult: false,
+  sort_by: "popularity.desc",
   page: 1,
-  include_video: false,
-  isOldestFirst: false,
   totalResults: 0,
   currentPage: 1,
-  currentMovie: null
+  currentMovie: null,
+  currentUrl: "",
+  currentQuery: ""
 };
 
 export default function reducer(state = initialState, action) {
   switch (action.type) {
+    case "ACTIVATE_PAGE":
+      return {
+        ...state,
+        currentPage: action.currentPage
+      };
     case "FETCH_MOVIES_BEGIN":
       return {
         ...state,
         loading: true,
-        error: null
+        error: null,
+        currentPage: action.currentPage
       };
     case "FETCH_MOVIES_SUCCESS":
       return {
         ...state,
         loading: false,
         movies: action.payload,
-        count: action.payload.length
+        count: action.payload.length,
+        currentUrl: action.currentUrl,
+        currentQuery: action.currentQuery
       };
     case "UPDATE_TOTAL_RESULTS":
       return {
         ...state,
-        totalResults: action.payload
+        totalResults: action.payload,
+        sort_by: action.currentSort
       };
-
     case "FETCH_MOVIES_FAILURE":
       return {
         ...state,
@@ -52,7 +58,7 @@ export default function reducer(state = initialState, action) {
     case "OPEN_MOVIE_ID":
       return {
         ...state,
-        currentMovie: action.filteredMovie,
+        currentMovie: action.filteredMovies,
         title: action.title,
         overview: action.overview,
         release_date: action.release_date,
@@ -66,6 +72,7 @@ export default function reducer(state = initialState, action) {
       };
     case "SET_MOVIES":
       return {
+        ...state,
         movies: action.movies
       };
     case "SET_MOVIE_INFO":
