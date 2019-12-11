@@ -19,7 +19,7 @@ import PaginationBottom from "../Pagination/Pagination";
 import { fetchMovies } from "../../actions/actions";
 import { searchMovies } from "../../actions/actions";
 import { setSearchQuery } from "../../actions/actions";
-import { searchByDirector } from "../../actions/actions";
+import { searchByDirector, activatePage } from "../../actions/actions";
 
 const styles = theme => ({
   search: {
@@ -68,31 +68,67 @@ const styles = theme => ({
   }
 });
 
-class HomePage extends Component {
+export class HomePage extends Component {
   componentDidMount() {
-    const values = queryString.parse(this.props.location.search);
-    this.props.location.search
-      ? this.props.searchMovies(values.query, values.page) &&
-        this.props.setSearchQuery(values.query)
-      : this.fetchAction();
+    window.addEventListener("popstate", this.onBackButtonEvent);
+    this.loadData();
   }
+
+  onBackButtonEvent = () => {
+    const decodedUrl = decodeURIComponent(this.props.location.pathname);
+    this.loadData(decodedUrl);
+  };
+
+  loadData = url => {
+    let values;
+    //check if call triggered on the window popstate event
+    if (url) {
+      values = queryString.parse(url.substr(url.indexOf("/") + 1));
+    } else {
+      values = this.props.location.pathname
+        ? queryString.parse(
+            this.props.location.pathname.substr(
+              this.props.location.pathname.indexOf("/") + 1
+            )
+          )
+        : "";
+    }
+    const currentPage = values.page ? parseInt(values.page, 10) : 1;
+    if (values && values.query) {
+      this.props.searchMovies(values.query, values.page);
+      this.props.setSearchQuery(values.query);
+      this.props.activatePage(currentPage);
+    } else if (values && values.director) {
+      this.props.searchByDirector(values.director);
+    } else {
+      this.props.fetchMovies("popularity.desc", values.page);
+      this.props.activatePage(currentPage);
+    }
+  };
 
   fetchAction = () => {
     this.props.fetchMovies(this.props.sort_by, this.props.currentPage);
   };
 
-  handleButtonClicked = e => {
+  handleTitleClicked = e => {
     this.props.searchQuery
       ? this.props.searchMovies(this.props.searchQuery) &&
         this.props.history.push(
-          `/?page=${this.props.page}&query=${this.props.searchQuery}`
+          encodeURIComponent(
+            `?page=${this.props.page}&query=${this.props.searchQuery}`
+          )
         )
       : this.fetchAction();
   };
 
-  handleButtonClicked2 = e => {
+  handleDirectorClicked = e => {
     this.props.searchQuery
-      ? this.props.searchByDirector(this.props.searchQuery)
+      ? this.props.searchByDirector(this.props.searchQuery) &&
+        this.props.history.push(
+          encodeURIComponent(
+            `/?page=${this.props.page}&director=${this.props.searchQuery}`
+          )
+        )
       : this.fetchAction();
   };
 
@@ -103,6 +139,10 @@ class HomePage extends Component {
   returnHome = () => {
     this.props.fetchMovies("popularity.desc", 1);
   };
+
+  componentWillUnmount() {
+    window.onpopstate = () => {};
+  }
 
   render() {
     const { classes } = this.props;
@@ -144,7 +184,7 @@ class HomePage extends Component {
                   fullWidth
                   value="title"
                   id="titleButton"
-                  onClick={this.handleButtonClicked}
+                  onClick={this.handleTitleClicked}
                 >
                   Title
                 </Button>
@@ -152,7 +192,8 @@ class HomePage extends Component {
                   variant="contained"
                   fullWidth
                   value="director"
-                  onClick={this.handleButtonClicked2}
+                  id="btnDirector"
+                  onClick={this.handleDirectorClicked}
                 >
                   Director
                 </Button>
@@ -162,20 +203,22 @@ class HomePage extends Component {
         </div>
         {this.props.loading ? (
           <div className={classes.load}>
-            <p>Loading.......</p>
+            <div id="loadingText">
+              <p>Loading.......</p>
+            </div>
             <CircularProgress />
           </div>
         ) : (
           <div>
-            <SortBox count={this.props.count} />
+            <SortBox totalResults={this.props.totalResults} />
             <MovieList movies={this.props.movies} />
             {numberPages > 1 ? (
               <div className={classes.pagination}>
                 <PaginationBottom
                   pages={numberPages}
-                  currentPage={this.props.currentPage}
                   currentUrl={this.props.currentUrl}
                   query={this.props.currentQuery}
+                  history={this.props.history}
                 />
               </div>
             ) : (
@@ -189,23 +232,24 @@ class HomePage extends Component {
 }
 
 const mapStateToProps = state => ({
+  loading: state.loading,
   movies: state.movies,
   error: state.error,
   searchQuery: state.searchQuery,
-  count: state.count,
   sort_by: state.sort_by,
   page: state.page,
-  totalResults: state.totalResults,
   currentPage: state.currentPage,
   currentUrl: state.currentUrl,
-  currentQuery: state.currentQuery
+  currentQuery: state.currentQuery,
+  totalResults: state.totalResults
 });
 
 const mapDispatchToProps = {
   fetchMovies,
   searchMovies,
   setSearchQuery,
-  searchByDirector
+  searchByDirector,
+  activatePage
 };
 
 export default withStyles(styles)(
