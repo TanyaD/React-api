@@ -1,10 +1,10 @@
-This project was bootstrapped with [Create React App]
+This project was bootstrapped with [Create React App] using movieDB API
+
+https://vast-beach-11735.herokuapp.com/
 
 Technology Stack:
 
-React & Redux
+React & Redux with thunk middleware
 Material-UI
-NodeJS with express, restify, restana or any other nodejs server.
-Jest for Testing
-
-https://vast-beach-11735.herokuapp.com/
+NodeJS with express
+Jest/Enzyme for unit Testing
