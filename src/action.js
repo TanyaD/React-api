@@ -4,20 +4,13 @@ export const FETCH_MOVIES_FAILURE = "FETCH_MOVIES_FAILURE";
 export const SEARCH_QUERY = "SEARCH_QUERY";
 export const OPEN_MOVIE_ID = "OPEN_MOVIE_ID";
 export const CLOSE_MODAL = "CLOSE_MODAL";
-export const SET_MOVIES = "SET_MOVIES";
 export const UPDATE_TOTAL_RESULTS = "UPDATE_TOTAL_RESULTS";
-export const SET_MOVIE_INFO = "SET_MOVIE_INFO";
 export const ACTIVATE_PAGE = "ACTIVATE_PAGE";
 
 const apiKey = process.env.REACT_APP_MOVIE_API_KEY;
 const base = "https://api.themoviedb.org";
 
 export const setSearchQuery = value => ({ type: SEARCH_QUERY, query: value });
-export const setMovielist = newMovies => ({
-  type: SET_MOVIES,
-  movies: newMovies
-});
-export const viewMovieInfo = id => ({ type: SET_MOVIE_INFO, id: id });
 export const closeModal = () => ({ type: CLOSE_MODAL });
 
 export const openMovieId = filteredMovies => ({
@@ -48,7 +41,7 @@ export const fetchMovieSuccess = (movies, url, query) => ({
 
 export const fetchMovieFailure = error => ({
   type: FETCH_MOVIES_FAILURE,
-  payload: { error }
+  payload: error
 });
 
 export const updateMovieResults = (totalResults, sort_by) => ({
@@ -112,9 +105,11 @@ export const searchByDirector = (query, page) => {
       page: page
     })
       .then(json => {
-        const movies = json.results[0].known_for;
-        const totalResults = movies.length;
-        dispatch(updateMovieResults(totalResults));
+        const movies = [];
+        for (let movieSet of json.results) {
+          movies.push(...movieSet.known_for)
+        }
+        dispatch(updateMovieResults(movies.length));
         dispatch(fetchMovieSuccess(movies, path, query));
         return json;
       })
