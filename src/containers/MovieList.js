@@ -1,94 +1,70 @@
-import React, { Component } from 'react';
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardMedia from '@material-ui/core/CardMedia';
-import CardContent from '@material-ui/core/CardContent';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import Card from "@material-ui/core/Card";
+import CardHeader from "@material-ui/core/CardHeader";
+import CardMedia from "@material-ui/core/CardMedia";
+import CardContent from "@material-ui/core/CardContent";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
 
-import Services from '../../services.js';
-import SimpleModal from '../Modal/Modal';
-import styles from './MovieList.module.css';
+import DialogView from "../Dialog/Dialog";
+import styles from "./MovieList.module.css";
+import { openMovieId } from "../../actions/actions";
+import { closeModal } from "../../actions/actions";
+import Camera from "../../images/analog-art-camera-390089.jpg";
 
 class MovieList extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      movies: [],
-      searchQuery: '',
-      count: 0,
-      open: false,
-      movieId: 0
-    };
-    this.services = new Services();
-  }
-
-  componentDidMount() {
-    this.services.getMovies().then(data =>
-      this.setState({
-        movies: data.results,
-        count: data.results.length
-      })
-    );
-    document.addEventListener('mousedown', this.handleClickOutside);
-  }
-  componentWillUnmount() {
-    document.removeEventListener('mousedown', this.handleClickOutside);
-  }
-
-  handleOpen = e => {
-    const movieID = e.target.id;
-    this.setState(state => ({
-      open: !state.open,
-      movieId: movieID
-    }));
+  handleClickOpen = e => {
+    const all = this.props.movies;
+    const id = parseInt(e.target.id, 10);
+    const filteredMovies = all.filter(movie => movie.id === id);
+    this.props.openMovieId(filteredMovies);
   };
 
-  handleClickOutside = event => {
-    this.setState({
-      open: false
-    });
+  handleClose = () => {
+    this.props.closeModal();
   };
 
   render() {
-    const listMovies = this.state.movies;
-    const myMovies = listMovies.map(item => (
-      <Grid
-        item
-        key={item.id}
-        className={styles.grid}
-        onClick={this.handleOpen}
-      >
+    const listMovies = this.props.movies;
+    const myMovies = listMovies.map((item, index) => (
+      <Grid key={index} item className={styles.grid}>
         <Card className={styles.card}>
           <CardHeader
             className={styles.cardhead}
             title={item.title}
             subheader={item.release_date}
           />
-          <CardMedia
-            className={styles.media}
-            image={`https://image.tmdb.org/t/p/w185_and_h278_bestv2/${item.poster_path}`}
-            title='Movie'
-            id={item.poster_path}
-          />
+          {item.poster_path ? (
+            <CardMedia
+              className={styles.media}
+              image={`https://image.tmdb.org/t/p/w185_and_h278_bestv2/${item.poster_path}`}
+              title={item.original_title}
+              id={item.id}
+              onClick={e => this.handleClickOpen(e)}
+            />
+          ) : (
+            <CardMedia
+              className={styles.media}
+              image={Camera}
+              title={item.original_title}
+              id={item.id}
+              onClick={e => this.handleClickOpen(e)}
+            />
+          )}
           <CardContent>
-            <Typography variant='body2' color='textSecondary' component='p'>
+            <Typography variant="body2" color="textSecondary" component="p">
               {item.overview}
             </Typography>
           </CardContent>
         </Card>
       </Grid>
     ));
-
     return (
       <div>
-        <div>
-          {this.state.open && (
-            <SimpleModal open={this.state.open} movieId={this.state.movieId} />
-          )}
-        </div>
+        <DialogView open={this.props.open} handleClose={this.handleClose} />
         <div className={styles.root}>
-          <Grid container className={styles.root} spacing={1}>
+          <Grid container className={styles.root} spacing={1} xs={12}>
             {myMovies}
           </Grid>
         </div>
@@ -97,4 +73,18 @@ class MovieList extends Component {
   }
 }
 
-export default MovieList;
+const mapStateToProps = state => ({
+  loading: state.loading,
+  movies: state.movies,
+  open: state.open
+});
+
+const mapDispatchToProps = {
+  openMovieId,
+  closeModal
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(MovieList);
