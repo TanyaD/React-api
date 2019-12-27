@@ -106,7 +106,7 @@ export const searchByDirector = (query, page) => {
     })
       .then(json => {
         const movies = [];
-        for (let movieSet of json.results) {
+        for (const movieSet of json.results) {
           movies.push(...movieSet.known_for)
         }
         dispatch(updateMovieResults(movies.length));
