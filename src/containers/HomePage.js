@@ -12,6 +12,8 @@ import Typography from "@material-ui/core/Typography";
 import InputBase from "@material-ui/core/InputBase";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import TextField from "@material-ui/core/TextField";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 import SortBox from "../SortBox/SortBox";
 import MovieList from "../MovieList/MovieList";
@@ -45,7 +47,9 @@ const styles = theme => ({
   },
   inputRoot: {
     color: "#FFF",
-    width: "100%"
+    width: "100%",
+    padding: "0" + " !important",
+    paddingLeft: "35px" + " !important"
   },
   inputInput: {
     padding: theme.spacing(1, 1, 1, 7),
@@ -140,6 +144,10 @@ export class HomePage extends Component {
     this.props.fetchMovies("popularity.desc", 1);
   };
 
+  setValue = value => {
+    this.props.setSearchQuery(value);
+  };
+
   componentWillUnmount() {
     window.onpopstate = () => {};
   }
@@ -147,6 +155,7 @@ export class HomePage extends Component {
   render() {
     const { classes } = this.props;
     const numberPages = Math.ceil(this.props.totalResults / 20);
+    const disabled = !this.props.searchQuery.length;
     return (
       <div>
         <div>
@@ -164,14 +173,30 @@ export class HomePage extends Component {
                 <div className={classes.searchIcon}>
                   <SearchIcon />
                 </div>
-                <InputBase
+                <Autocomplete
                   classes={{
-                    root: classes.inputRoot,
-                    input: classes.inputInput
+                    inputRoot: classes.inputRoot
                   }}
-                  value={this.props.searchQuery}
-                  onInput={e => this.setSearchQuery(e)}
-                  placeholder="Search ..."
+                  inputValue={this.props.searchQuery}
+                  id="combo-box-demo"
+                  options={this.props.movies}
+                  getOptionLabel={option => option.title}
+                  renderInput={params => (
+                    <TextField {...params} variant="outlined" fullWidth />
+                  )}
+                  onInputChange={(event, value, reason) => {
+                    if (event && event.target && reason === "input") {
+                      this.setValue(value);
+                    }
+                  }}
+                  onClose={event => {
+                    if (
+                      event.target.textContent &&
+                      event.target.textContent.trim() !== ""
+                    ) {
+                      this.setValue(event.target.textContent);
+                    }
+                  }}
                 />
               </div>
               <ButtonGroup
@@ -180,6 +205,7 @@ export class HomePage extends Component {
                 aria-label="small contained button group"
               >
                 <Button
+                disabled={disabled}
                   variant="contained"
                   fullWidth
                   value="title"
@@ -189,6 +215,7 @@ export class HomePage extends Component {
                   Title
                 </Button>
                 <Button
+                disabled={disabled}
                   variant="contained"
                   fullWidth
                   value="director"
@@ -210,7 +237,10 @@ export class HomePage extends Component {
           </div>
         ) : (
           <div>
-            <SortBox totalResults={this.props.totalResults} />
+            <SortBox
+              totalResults={this.props.totalResults}
+              numberPages={numberPages}
+            />
             <MovieList movies={this.props.movies} />
             {numberPages > 1 ? (
               <div className={classes.pagination}>
